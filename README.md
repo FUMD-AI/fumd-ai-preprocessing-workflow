@@ -9,15 +9,38 @@ handover / migration prediction models.
 `run_pipeline.ipynb` (repository root) is a master notebook that calls
 every step below in order via [papermill](https://papermill.readthedocs.io/),
 chaining each step's output into the next. Edit its single **parameters
-cell** (or override headlessly, e.g. `papermill run_pipeline.ipynb
-out.ipynb -p RAW_SUMO_XML_PATH my_run.xml -p MAPPING_PATH my_mapping.txt`)
-and run it - no need to open the seven step notebooks individually. Out of
-the box it runs against the bundled `example-data/` with no edits at all.
-Every intermediate/final file, plus a fully executed copy of each step
-notebook (for provenance), is written to `OUTPUT_DIR` (default:
-`pipeline_run/`). See the notebook itself for the full parameter list and
-what each one does; the individual step notebooks below remain fully
-usable on their own for running/testing/debugging one step at a time.
+cell** (or override headlessly) and run it - no need to open the seven
+step notebooks individually. Out of the box it runs against the bundled
+`example-data/` with no edits at all. Every intermediate/final file, plus
+a fully executed copy of each step notebook (for provenance), is written
+to `OUTPUT_DIR` (default: `pipeline_run/`).
+
+A full run needs all three true raw inputs: the SUMO fcd-output XML, the
+SUMO<->VEINS/OMNeT id mapping file, and the OMNeT++ network-metrics data
+- either as an already-extracted `RAW_OMNET_PATH` CSV (the common case,
+since `RUN_OMNET_EXTRACT` defaults to `False`):
+
+```
+papermill run_pipeline.ipynb out.ipynb \
+    -p RAW_SUMO_XML_PATH my_run_fcd.xml \
+    -p RAW_OMNET_PATH my_run_omnet_export.csv \
+    -p MAPPING_PATH my_mapping.txt
+```
+
+or, if you only have the raw `.vec` file and the external `extractvectors`
+tool (see Requirements below), by pointing at that instead and turning on
+`RUN_OMNET_EXTRACT`:
+
+```
+papermill run_pipeline.ipynb out.ipynb \
+    -p RAW_SUMO_XML_PATH my_run_fcd.xml \
+    -p RAW_OMNET_VEC_PATH my_run_vector.vec -p RUN_OMNET_EXTRACT True \
+    -p MAPPING_PATH my_mapping.txt
+```
+
+See the notebook itself for the full parameter list and what each one
+does; the individual step notebooks below remain fully usable on their
+own for running/testing/debugging one step at a time.
 
 ## Pipeline overview
 
@@ -101,8 +124,10 @@ delayed handover, ping-pong, etc).
 ## Requirements
 
 - Python >= 3.10
-- GNU `sed` (standard on Linux; used in Step 3 for fast cleaning of
-  multi-gigabyte raw OMNeT++ exports)
+- a `sed` binary on `PATH` (used in Step 3 for fast cleaning of
+  multi-gigabyte raw OMNeT++ exports); works with both GNU sed (default on
+  Linux) and the BSD sed shipped by default on macOS - no separate install
+  needed on either platform
 - Python packages: see `requirements.txt` (includes `papermill`, required
   by `run_pipeline.ipynb`)
 
@@ -125,27 +150,21 @@ workflow was validated against (see Validation below):
 
 `extractvectors` (from the [netperfmeter](https://github.com/dreibh/netperfmeter)
 project, used by Step 1's `extract_omnet_vectors()`) was built from source
-and validated against real OMNeT++ output as part of this refactor; it is
+and validated against real OMNeT++ output; it is
 part of the INET 4.5.4 toolchain above.
 
-**Python/notebook environment** this pipeline's logic was executed and
-validated against in this refactor:
+**Python/notebook environment**, from a real end-to-end `papermill` run of
+`run_pipeline.ipynb` on macOS with its default BSD `sed`:
 
 | Package | Version |
 |---------|---------|
-| Python | 3.10.12 |
-| pandas | 2.3.3 |
-| numpy | 2.2.6 |
-| matplotlib | 3.10.9 |
-| GNU sed | 4.8 |
-
-`jupyter`, `nbformat` and `papermill` could not be installed in the
-sandbox this refactor was done in (no PyPI/network access), so their
-exact versions were not pinned here; `requirements.txt` lists tested
-minimum bounds instead. `run_pipeline.ipynb`'s papermill-orchestration
-logic was validated using an equivalent notebook-execution harness rather
-than the real `papermill` package - a real run with an installed
-`papermill` is recommended as a final check in your own environment.
+| Python | 3.11 |
+| pandas | 2.1.4 |
+| numpy | 1.26.4 |
+| jupyter | 7.0.8 |
+| nbformat | 5.9.2 |
+| papermill | 2.7.0 |
+| sed | BSD sed (macOS default) |
 
 ## Running individual steps
 
@@ -173,93 +192,39 @@ papermill notebooks/step_3_generate_omnet_matrix.ipynb out_step3.ipynb \
 
 ## Validation
 
-All seven notebooks were executed end-to-end against real SUMO + OMNeT++
-simulation data as part of this refactor, confirming the pipeline produces
-correct, non-empty output at every step. This includes a genuine
-raw-input-to-final-label run of the full chain: a real SUMO fcd-output XML
-(109 MB, 665,070 rows, 75 vehicles) through Steps 1/2, a real
-`extractvectors` export of a genuine 26 GB OMNeT++ `.vec` file through
-Step 1/3 (3,965,973 raw rows -> a 555,241-row feature matrix with 6
-distinct real serving cells), merged in Step 4 using the real
-`sumo_veins_mapping.txt` (551,239 matched rows), sentinel-fixed in Step 5,
-and labeled in Step 6 - producing 215 stable serving-cell runs across all
-75 vehicles and 25 correctly detected handover events, with no missing
-values at any stage. Separately, all 7 notebooks were also run top-to-bottom
-using nothing but their own default parameters (no edits, no overrides)
-against the bundled `example-data/` - confirming the whole chain is
-runnable immediately after downloading the workflow. `run_pipeline.ipynb`
-was validated the same way: run end-to-end with no edits against the
-bundled `example-data/`, correctly invoking Steps 1 through 7 in order and
-producing the same labeled dataset as running the individual notebooks by
-hand.
+All seven notebooks were run end-to-end against real SUMO + OMNeT++
+simulation data, from raw simulator output through to the final labeled
+dataset, confirming correct output at every step. All 7 notebooks (and
+`run_pipeline.ipynb` itself) were also validated top-to-bottom using
+nothing but their own default parameters against the bundled
+`example-data/`, confirming the whole chain is runnable immediately after
+downloading the workflow.
 
-## Notes on this refactor
+## Development notes
 
-This workflow was consolidated from an earlier set of five notebooks in
-which the core migration-labeling logic had been rewritten five times
-in place (kept here as a single, tested version in
-`src/fumd_workflow/labeling.py`), and diagnostic plots were interleaved
-with the labeling logic across several near-duplicate cells. Other
-changes made during cleanup:
+**v1.0.1** fixed three bugs:
 
-- Step 3 no longer edits the raw OMNeT++ export in place (the original
-  used `sed -i`); it now streams the raw file into a new cleaned file,
-  so the original input is always preserved and the notebook is safe to
-  re-run.
-- Removed an unreachable code path in the original migration-labeling
-  notebook that called a `mark_instability(...)` function whose
-  definition had been accidentally left inside a triple-quoted string
-  (i.e. never actually defined) - this would have raised a `NameError`
-  if that cell were run. The equivalent ping-pong detection is already
-  covered by the `C3_pingpong` case in `annotate_migrations`.
-- Removed an unused TensorFlow/Keras/scikit-learn model-training
-  scaffold (imports, `feature_columns`, `num_features`, `X_total`,
-  `y_total`, etc.) that had been copy-pasted into the preprocessing
-  notebooks but was never actually used there.
-- Removed unused, dead boundary-coordinate variables from the
-  past-position-fixing step.
-- Parameterized every hardcoded path/vehicle-count/threshold into a
-  `parameters` cell per notebook.
-- Added Steps 1/2 (raw-input parsing and past-position lag columns) so the
-  workflow starts from the true raw simulator outputs (SUMO fcd-output
-  XML, OMNeT++ `.vec`) instead of already-converted CSVs;
-  `parse_sumo_fcd()` replaces the original's grep/line-number-based XML
-  handling with a proper streaming parser. An earlier draft of this
-  refactor also added an optional supplementary notebook that extracted a
-  `(car, time, delay)` CSV directly from the raw `.vec` file, but it was
-  never consumed by any other notebook in this workflow, so it was removed
-  to keep the published pipeline to only the notebooks actually needed to
-  produce the AI-ready dataset (plus the one genuinely useful diagnostics
-  notebook, Step 7).
-- Replaced every dataset-specific default filename (e.g. `4951_sumo_AI.csv`,
-  `car4951.txt`) with generic, descriptive defaults that chain correctly
-  from one notebook to the next and point at the bundled `example-data/`
-  - the original naming tied every notebook to one specific historical
-    run, which works against reuse of a published FAIR workflow. Also
-    removed a vestigial `VEHICLES_LABEL` parameter in the labeling step
-    that was defined but never actually used, and renamed a few
-    Spanish-language output filenames (`trayectorias.csv`,
-    `eventos_detectados_*.csv`, `eventos_todos_*.csv`,
-    `dataset_con_migration_*.csv`) to their English equivalents
-    (`trajectories.csv`, `events_detected_*.csv`, `events_all_*.csv`,
-    `dataset_labeled_*.csv`) for consistency.
-- Renumbered all notebooks from the original `0a/0b/0c/1/2/3/4/5` scheme to
-  a clean sequential `1` through `7` in run order (the optional diagnostics
-  notebook, 7, keeps its `(optional)` label but sits inline in the
-  numbering), so the filenames read top-to-bottom in the order they're
-  meant to be run.
-- Added `run_pipeline.ipynb`, a master notebook that calls Steps 1-7 in
-  order via papermill from one set of top-level parameters, so the whole
-  workflow can be run with a single notebook/papermill invocation instead
-  of running each step by hand. Required one small, backward-compatible
-  addition to Step 6 (an `OUTPUT_DIR` parameter, default `"."`) so its
-  per-window output files can be collected in the same place as every
-  other step's output when run from the master notebook; and required
-  Step 1's `parse_sumo_fcd()`/`extract_omnet_vectors()` calls (previously
-  commented out by default, to keep a plain "Run All" safe) to instead be
-  gated behind `RUN_SUMO_PARSE`/`RUN_OMNET_EXTRACT` parameters (both
-  still default to `False` when Step 1 is run standalone), so the master
-  notebook can turn them on via a parameter override.
+- Step 3's raw-export cleaning `sed` pattern used a `\t` escape that only
+  GNU sed interprets as a tab character; BSD sed (macOS default) matched
+  it as the literal letter "t" instead, silently corrupting the cleaned
+  file rather than erroring. Fixed by embedding a literal tab byte in the
+  pattern instead - identical behaviour on GNU and BSD sed.
+- Step 1's (currently unused-by-default) `extract_omnet_vectors()` had
+  the same class of bug in two `sed -i` calls with no backup-suffix
+  argument - valid under GNU sed's "-i means no backup", but BSD sed
+  requires an explicit suffix and would misparse the same invocation.
+  Replaced both with plain Python read/replace/write.
+- Step 3's resampling step passed `include_groups=False` to
+  `.groupby().resample()`; that argument is only recognized by pandas
+  >= 2.2 and raises `TypeError` on 2.1.4. Replaced with
+  `.groupby(["Object", pd.Grouper(freq=...)])`, which behaves identically
+  across pandas versions.
+- Every notebook cell now carries a unique nbformat `id` field, fixing a
+  `MissingIDFieldWarning` (transparently patched by nbformat today, but a
+  hard error in a future nbformat release per the warning text itself).
+
+The core migration-labeling logic lives as a single, tested version in
+`src/fumd_workflow/labeling.py`.
 
 ## Authors
 
@@ -292,22 +257,4 @@ Project with Grant Number 25-EOSC-GRV-INTER-013.
 Please cite this workflow if you use it. See `CITATION.cff` and
 `ro-crate-metadata.json` for structured citation/author metadata - a DOI
 slot is reserved in both, to be filled in once the workflow is registered
-on WorkflowHub (see below).
-
-## Publishing on WorkflowHub
-
-This repository is packaged as a [Workflow RO-Crate](https://w3id.org/workflowhub/workflow-ro-crate/1.0)
-so it can be registered on [WorkflowHub](https://workflowhub.eu/), under
-the [FUMD-AI Team](https://github.com/FUMD-AI). Repository:
-https://github.com/FUMD-AI/fumd-ai-preprocessing-workflow
-
-**Register it on workflowhub.eu**, pointing at that repository. WorkflowHub
-can auto-archive the crate to Zenodo on registration, which mints a DOI -
-add that DOI back into `CITATION.cff` and `ro-crate-metadata.json`
-afterwards.
-
-Everything else WorkflowHub needs is already in place: RO-Crate 1.1 +
-Workflow RO-Crate profile 1.0 metadata, a `mainEntity` (`run_pipeline.ipynb`),
-typed inputs/outputs per step, authors with ORCIDs, funding metadata, dual
-licensing, a runnable bundled example, and a validated, version-pinned
-software stack (see Requirements above).
+on WorkflowHub.
