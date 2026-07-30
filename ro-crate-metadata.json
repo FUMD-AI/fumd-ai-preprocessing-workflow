@@ -340,8 +340,8 @@
       "@id": "#jupyter-notebook",
       "@type": "ComputerLanguage",
       "name": "Jupyter Notebook",
-      "identifier": { "@id": "https://jupyter.org" },
-      "url": { "@id": "https://jupyter.org" }
+      "identifier": { "@id": "https://jupyter.org/" },
+      "url": { "@id": "https://jupyter.org/" }
     },
     {
       "@id": "#python",
