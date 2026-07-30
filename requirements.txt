@@ -1,0 +1,6 @@
+pandas>=2.0
+numpy>=1.24
+matplotlib>=3.7
+jupyter>=1.0
+nbformat>=5.9
+papermill>=2.4  # required by run_pipeline.ipynb (the master orchestrator); also enables headless, parameterized execution of each individual step notebook

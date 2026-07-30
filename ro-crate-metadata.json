@@ -1,0 +1,522 @@
+{
+  "@context": "https://w3id.org/ro/crate/1.1/context",
+  "@graph": [
+    {
+      "@id": "ro-crate-metadata.json",
+      "@type": "CreativeWork",
+      "about": { "@id": "./" },
+      "conformsTo": [
+        { "@id": "https://w3id.org/ro/crate/1.1" },
+        { "@id": "https://w3id.org/workflowhub/workflow-ro-crate/1.0" }
+      ]
+    },
+    {
+      "@id": "./",
+      "@type": "Dataset",
+      "name": "FUMD-AI Preprocessing Workflow",
+      "description": "Turns raw SUMO (vehicle mobility) and OMNeT++ (cellular network) simulation output into a labeled, AI-ready dataset of cellular handover/migration events. Seven Jupyter notebooks, numbered 1-7 in run order, cover the pipeline: parse raw simulator output (1), add past-position lag columns (2), generate the OMNeT++ feature matrix (3), merge it with SUMO trajectories (4), fix placeholder past-position values (5), label migration/destination - the AI-ready dataset (6), and optional diagnostic visualizations (7). A master notebook, run_pipeline.ipynb, calls all seven in order via papermill from one set of top-level parameters, so the whole workflow can be run with a single notebook invocation instead of running each step by hand; the individual step notebooks also remain fully usable on their own. Every notebook's default parameters chain onto the tiny bundled example-data/ directory, so the whole workflow is runnable immediately after downloading, with no edits, against a small synthetic (non-real) dataset. See README.md for the full step-by-step description, inputs/outputs, and how to run each step (including headless/parameterized execution with papermill). Unless otherwise indicated, source code is MIT-licensed and explanatory text/figures are CC BY 4.0; input datasets retain the licences stated in their own metadata/source records.",
+      "version": "1.0.0",
+      "license": [
+        "https://spdx.org/licenses/MIT",
+        "https://creativecommons.org/licenses/by/4.0/"
+      ],
+      "author": [
+        { "@id": "#cristina-bernad" },
+        { "@id": "#sonja-filiposka" },
+        { "@id": "#katja-gilly" }
+      ],
+      "funding": [ { "@id": "#fumdai-grant" } ],
+      "softwareRequirements": [
+        { "@id": "#omnetpp" },
+        { "@id": "#simu5g" },
+        { "@id": "#inet" },
+        { "@id": "#veins" },
+        { "@id": "#sumo" },
+        { "@id": "#netperfmeter" },
+        { "@id": "#python" }
+      ],
+      "keywords": [
+        "SUMO",
+        "OMNeT++",
+        "vehicular networks",
+        "cellular handover",
+        "mobility prediction",
+        "machine learning dataset",
+        "5G",
+        "V2X"
+      ],
+      "mainEntity": { "@id": "run_pipeline.ipynb" },
+      "hasPart": [
+        { "@id": "run_pipeline.ipynb" },
+        { "@id": "notebooks/step_1_parse_raw_sumo_and_omnet.ipynb" },
+        { "@id": "notebooks/step_2_add_past_position_columns.ipynb" },
+        { "@id": "notebooks/step_3_generate_omnet_matrix.ipynb" },
+        { "@id": "notebooks/step_4_merge_sumo_omnet.ipynb" },
+        { "@id": "notebooks/step_5_fix_past_positions.ipynb" },
+        { "@id": "notebooks/step_6_label_cell_migrations.ipynb" },
+        { "@id": "notebooks/step_7_visualize_migrations_optional.ipynb" },
+        { "@id": "src/fumd_workflow/__init__.py" },
+        { "@id": "src/fumd_workflow/labeling.py" },
+        { "@id": "README.md" },
+        { "@id": "CITATION.cff" },
+        { "@id": "LICENSE.txt" },
+        { "@id": "LICENSE-CC-BY-4.0.txt" },
+        { "@id": "requirements.txt" },
+        { "@id": "example-data/raw_sumo_fcd.xml" },
+        { "@id": "example-data/raw_omnet_vector.vec" },
+        { "@id": "example-data/raw_omnet_export.csv" },
+        { "@id": "example-data/sumo_veins_mapping.txt" }
+      ]
+    },
+    {
+      "@id": "#cristina-bernad",
+      "@type": "Person",
+      "name": "Cristina Bernad",
+      "identifier": "https://orcid.org/0000-0001-9537-415X",
+      "affiliation": { "@id": "#umh" }
+    },
+    {
+      "@id": "#sonja-filiposka",
+      "@type": "Person",
+      "name": "Sonja Filiposka",
+      "email": "sonja.filiposka@finki.ukim.mk",
+      "identifier": "https://orcid.org/0000-0003-0034-2855",
+      "affiliation": { "@id": "#ukim" }
+    },
+    {
+      "@id": "#katja-gilly",
+      "@type": "Person",
+      "name": "Katja Gilly",
+      "identifier": "https://orcid.org/0000-0002-8985-0639",
+      "affiliation": { "@id": "#umh" }
+    },
+    {
+      "@id": "#ukim",
+      "@type": "Organization",
+      "name": "Ss. Cyril and Methodius University in Skopje"
+    },
+    {
+      "@id": "#umh",
+      "@type": "Organization",
+      "name": "Miguel Hernandez University"
+    },
+    {
+      "@id": "#fumdai-grant",
+      "@type": "Grant",
+      "name": "FUMD-AI",
+      "identifier": "25-EOSC-GRV-INTER-013",
+      "description": "This work has been funded by the FUMD-AI project, an EOSC GRAVITY - Inter Project with Grant Number 25-EOSC-GRV-INTER-013.",
+      "funder": { "@id": "#eosc-gravity" }
+    },
+    {
+      "@id": "#eosc-gravity",
+      "@type": "Organization",
+      "name": "EOSC GRAVITY"
+    },
+
+    {
+      "@id": "run_pipeline.ipynb",
+      "@type": ["File", "SoftwareSourceCode", "ComputationalWorkflow"],
+      "name": "Master pipeline: run the full workflow end-to-end",
+      "description": "Orchestrator notebook that calls Steps 1-7 (notebooks/step_1_...ipynb through notebooks/step_7_...ipynb) in order via papermill, passing each step's output into the next from one set of top-level parameters. Writes every intermediate/final file, plus a fully executed copy of each step notebook for provenance, under OUTPUT_DIR. Run from the repository root, same as the individual step notebooks.",
+      "conformsTo": { "@id": "https://bioschemas.org/profiles/ComputationalWorkflow/1.0-RELEASE" },
+      "programmingLanguage": { "@id": "#jupyter-notebook" },
+      "encodingFormat": "application/x-ipynb+json",
+      "input": [
+        { "@id": "#param-raw-sumo-xml-path" },
+        { "@id": "#param-raw-omnet-vec-path" },
+        { "@id": "#param-raw-omnet-path" },
+        { "@id": "#param-mapping-path" },
+        { "@id": "#param-notebooks-dir" },
+        { "@id": "#param-output-dir" },
+        { "@id": "#param-run-sumo-parse" },
+        { "@id": "#param-run-omnet-extract" },
+        { "@id": "#param-run-visualization" },
+        { "@id": "#param-window-s-values" },
+        { "@id": "#param-tol-s" }
+      ],
+      "output": [
+        { "@id": "#param-labeled-dataset-path" }
+      ],
+      "hasPart": [
+        { "@id": "notebooks/step_1_parse_raw_sumo_and_omnet.ipynb" },
+        { "@id": "notebooks/step_2_add_past_position_columns.ipynb" },
+        { "@id": "notebooks/step_3_generate_omnet_matrix.ipynb" },
+        { "@id": "notebooks/step_4_merge_sumo_omnet.ipynb" },
+        { "@id": "notebooks/step_5_fix_past_positions.ipynb" },
+        { "@id": "notebooks/step_6_label_cell_migrations.ipynb" },
+        { "@id": "notebooks/step_7_visualize_migrations_optional.ipynb" }
+      ]
+    },
+    {
+      "@id": "notebooks/step_1_parse_raw_sumo_and_omnet.ipynb",
+      "@type": ["File", "SoftwareSourceCode", "ComputationalWorkflow"],
+      "name": "Step 1: Parse raw SUMO and OMNeT++ simulation output",
+      "description": "Turns the two genuinely raw simulator outputs - a SUMO fcd-output XML file and an OMNeT++ .vec vector file - into the flat CSVs the rest of the workflow reads: parse_sumo_fcd() streams the XML into a per-vehicle-per-timestep trajectory CSV, and extract_omnet_vectors() pulls the named network-quality vectors out of the .vec file into a long-format CSV.",
+      "position": 1,
+      "conformsTo": { "@id": "https://bioschemas.org/profiles/ComputationalWorkflow/1.0-RELEASE" },
+      "programmingLanguage": { "@id": "#jupyter-notebook" },
+      "encodingFormat": "application/x-ipynb+json",
+      "input": [
+        { "@id": "#param-raw-sumo-xml-path" },
+        { "@id": "#param-raw-omnet-vec-path" }
+      ],
+      "output": [
+        { "@id": "#param-sumo-base-path" },
+        { "@id": "#param-raw-omnet-path" }
+      ]
+    },
+    {
+      "@id": "notebooks/step_2_add_past_position_columns.ipynb",
+      "@type": ["File", "SoftwareSourceCode", "ComputationalWorkflow"],
+      "name": "Step 2: Add past-position columns",
+      "description": "Adds lagged x-1..x-7/y-1..y-7 past-position columns to the Step 1 SUMO CSV (SUMO's own 999999 'no history yet' sentinel is left as-is here; Step 5 replaces it later, after Step 4's merge).",
+      "position": 2,
+      "conformsTo": { "@id": "https://bioschemas.org/profiles/ComputationalWorkflow/1.0-RELEASE" },
+      "programmingLanguage": { "@id": "#jupyter-notebook" },
+      "encodingFormat": "application/x-ipynb+json",
+      "input": [
+        { "@id": "#param-sumo-base-path" }
+      ],
+      "output": [
+        { "@id": "#param-vehicles-path" }
+      ]
+    },
+    {
+      "@id": "notebooks/step_3_generate_omnet_matrix.ipynb",
+      "@type": ["File", "SoftwareSourceCode", "ComputationalWorkflow"],
+      "name": "Step 3: Generate the OMNeT++ feature matrix",
+      "description": "Cleans a raw OMNeT++ vector export and pivots it into a wide, per-vehicle-per-timestep table of network-quality metrics, with lagged/lead serving-cell columns.",
+      "position": 3,
+      "conformsTo": { "@id": "https://bioschemas.org/profiles/ComputationalWorkflow/1.0-RELEASE" },
+      "programmingLanguage": { "@id": "#jupyter-notebook" },
+      "encodingFormat": "application/x-ipynb+json",
+      "input": [
+        { "@id": "#param-raw-omnet-path" }
+      ],
+      "output": [
+        { "@id": "#param-omnet-matrix-path" }
+      ]
+    },
+    {
+      "@id": "notebooks/step_4_merge_sumo_omnet.ipynb",
+      "@type": ["File", "SoftwareSourceCode", "ComputationalWorkflow"],
+      "name": "Step 4: Merge SUMO trajectories with the OMNeT++ feature matrix",
+      "description": "Aligns SUMO and OMNeT++ vehicle ids using a mapping file and merges the SUMO trajectory with the Step 3 network-metric matrix.",
+      "position": 4,
+      "conformsTo": { "@id": "https://bioschemas.org/profiles/ComputationalWorkflow/1.0-RELEASE" },
+      "programmingLanguage": { "@id": "#jupyter-notebook" },
+      "encodingFormat": "application/x-ipynb+json",
+      "input": [
+        { "@id": "#param-vehicles-path" },
+        { "@id": "#param-omnet-matrix-path" },
+        { "@id": "#param-mapping-path" }
+      ],
+      "output": [
+        { "@id": "#param-combined-path" }
+      ]
+    },
+    {
+      "@id": "notebooks/step_5_fix_past_positions.ipynb",
+      "@type": ["File", "SoftwareSourceCode", "ComputationalWorkflow"],
+      "name": "Step 5: Fix placeholder past-position values",
+      "description": "Replaces the 999999 sentinel SUMO uses for 'no history yet' in the lagged position columns with each vehicle's first known coordinate.",
+      "position": 5,
+      "conformsTo": { "@id": "https://bioschemas.org/profiles/ComputationalWorkflow/1.0-RELEASE" },
+      "programmingLanguage": { "@id": "#jupyter-notebook" },
+      "encodingFormat": "application/x-ipynb+json",
+      "input": [
+        { "@id": "#param-combined-path" }
+      ],
+      "output": [
+        { "@id": "#param-new-combined-path" }
+      ]
+    },
+    {
+      "@id": "notebooks/step_6_label_cell_migrations.ipynb",
+      "@type": ["File", "SoftwareSourceCode", "ComputationalWorkflow"],
+      "name": "Step 6: Label cell migrations (the AI-ready dataset)",
+      "description": "Reconstructs each vehicle's stable serving-cell history and labels every row with migration (0/1/2, pre-handover warning window) and destination (the cell the vehicle will actually settle on). Produces the final AI-ready dataset. Imports src/fumd_workflow for the trajectory-reconstruction and migration-labeling logic.",
+      "position": 6,
+      "conformsTo": { "@id": "https://bioschemas.org/profiles/ComputationalWorkflow/1.0-RELEASE" },
+      "programmingLanguage": { "@id": "#jupyter-notebook" },
+      "encodingFormat": "application/x-ipynb+json",
+      "input": [
+        { "@id": "#param-new-combined-path" }
+      ],
+      "output": [
+        { "@id": "#param-labeled-dataset-path" }
+      ],
+      "softwareRequirements": [
+        { "@id": "src/fumd_workflow/labeling.py" }
+      ]
+    },
+    {
+      "@id": "notebooks/step_7_visualize_migrations_optional.ipynb",
+      "@type": ["File", "SoftwareSourceCode", "ComputationalWorkflow"],
+      "name": "Step 7 (optional): Visualize and sanity-check the migration labels",
+      "description": "Supplementary/exploratory notebook: diagnostic plots (time spent in unstable mobility, event-type distribution, events per vehicle, spatial map of handovers) over the Step 6 outputs. Not required to produce the AI-ready dataset.",
+      "position": 7,
+      "conformsTo": { "@id": "https://bioschemas.org/profiles/ComputationalWorkflow/1.0-RELEASE" },
+      "programmingLanguage": { "@id": "#jupyter-notebook" },
+      "encodingFormat": "application/x-ipynb+json",
+      "input": [
+        { "@id": "#param-labeled-dataset-path" }
+      ]
+    },
+
+    {
+      "@id": "src/fumd_workflow/__init__.py",
+      "@type": ["File", "SoftwareSourceCode"],
+      "name": "fumd_workflow package init",
+      "programmingLanguage": { "@id": "#python" }
+    },
+    {
+      "@id": "src/fumd_workflow/labeling.py",
+      "@type": ["File", "SoftwareSourceCode"],
+      "name": "Trajectory reconstruction and migration-labeling logic",
+      "description": "build_trajectories() and annotate_migrations(): shared, importable implementation of the stable-serving-cell trajectory reconstruction and handover/ping-pong event classification used by Step 6.",
+      "programmingLanguage": { "@id": "#python" }
+    },
+    {
+      "@id": "README.md",
+      "@type": "File",
+      "about": { "@id": "./" },
+      "encodingFormat": "text/markdown"
+    },
+    {
+      "@id": "CITATION.cff",
+      "@type": "File",
+      "about": { "@id": "./" },
+      "encodingFormat": "text/plain",
+      "description": "Citation File Format (CFF) metadata for citing this workflow, mirroring the authorship/license/version details in this RO-Crate."
+    },
+    {
+      "@id": "LICENSE.txt",
+      "@type": "File",
+      "encodingFormat": "text/plain",
+      "license": "https://spdx.org/licenses/MIT",
+      "description": "MIT License text (applies to source code)."
+    },
+    {
+      "@id": "LICENSE-CC-BY-4.0.txt",
+      "@type": "File",
+      "encodingFormat": "text/plain",
+      "license": "https://creativecommons.org/licenses/by/4.0/",
+      "description": "Creative Commons Attribution 4.0 International License text (applies to explanatory text and original figures)."
+    },
+    {
+      "@id": "requirements.txt",
+      "@type": "File",
+      "encodingFormat": "text/plain",
+      "description": "Python package dependencies."
+    },
+    {
+      "@id": "example-data/raw_sumo_fcd.xml",
+      "@type": "File",
+      "encodingFormat": "application/xml",
+      "description": "Tiny synthetic SUMO fcd-output XML bundled as Step 1's default input (2 vehicles, 8 simulated seconds) - not real simulation data, exists only so the workflow is runnable immediately after downloading. See README.md 'Example data'."
+    },
+    {
+      "@id": "example-data/raw_omnet_vector.vec",
+      "@type": "File",
+      "encodingFormat": "text/plain",
+      "description": "Tiny synthetic raw OMNeT++ .vec file illustrating the format Step 1's extractvectors-dependent function expects - not real simulation data. Requires the external extractvectors tool to actually process."
+    },
+    {
+      "@id": "example-data/raw_omnet_export.csv",
+      "@type": "File",
+      "encodingFormat": "text/tab-separated-values",
+      "description": "Tiny synthetic long-format OMNeT++ export (as if produced by Step 1's extract_omnet_vectors() from a real .vec file) bundled as Step 3's default input, so Steps 3 onward are runnable without the external extractvectors tool. Includes one genuine handover (vehicle 0, cell 1 -> cell 2 at t=4.0s) - not real simulation data."
+    },
+    {
+      "@id": "example-data/sumo_veins_mapping.txt",
+      "@type": "File",
+      "encodingFormat": "text/plain",
+      "description": "Tiny synthetic SUMO<->VEINS/OMNeT id mapping (2 vehicles, SUMO ids 100/101 mapped to VEINS ids 0/1) bundled as Step 4's default MAPPING_PATH."
+    },
+
+    {
+      "@id": "#jupyter-notebook",
+      "@type": "ComputerLanguage",
+      "name": "Jupyter Notebook",
+      "identifier": { "@id": "https://jupyter.org" },
+      "url": { "@id": "https://jupyter.org" }
+    },
+    {
+      "@id": "#python",
+      "@type": "ComputerLanguage",
+      "name": "Python",
+      "identifier": { "@id": "https://www.python.org/" },
+      "url": { "@id": "https://www.python.org/" }
+    },
+
+    {
+      "@id": "#omnetpp",
+      "@type": "SoftwareApplication",
+      "name": "OMNeT++",
+      "softwareVersion": "6.3.0",
+      "url": { "@id": "https://omnetpp.org/download/old" },
+      "description": "Discrete-event network simulation framework used to generate the raw .vec vector output this workflow parses (Step 1) and cleans/pivots (Step 3)."
+    },
+    {
+      "@id": "#simu5g",
+      "@type": "SoftwareApplication",
+      "name": "Simu5G",
+      "softwareVersion": "1.4.4",
+      "url": { "@id": "https://github.com/Unipisa/Simu5G/releases/tag/v1.4.4" },
+      "description": "OMNeT++ model of 4G/5G cellular networks used to simulate the serving-cell/SINR/CQI/RLC metrics this workflow labels handover events from."
+    },
+    {
+      "@id": "#inet",
+      "@type": "SoftwareApplication",
+      "name": "INET Framework",
+      "softwareVersion": "4.5.4",
+      "url": { "@id": "https://inet.omnetpp.org/2024-10-29-INET-4.5.4-released.html" },
+      "description": "OMNeT++ networking-protocol model library that Simu5G/Veins build on."
+    },
+    {
+      "@id": "#veins",
+      "@type": "SoftwareApplication",
+      "name": "Veins",
+      "softwareVersion": "5.3.1",
+      "url": { "@id": "https://veins.car2x.org/download/" },
+      "description": "Vehicular network simulation framework coupling OMNeT++ with SUMO; produces the SUMO<->VEINS/OMNeT id mapping this workflow's Step 4 consumes."
+    },
+    {
+      "@id": "#sumo",
+      "@type": "SoftwareApplication",
+      "name": "SUMO",
+      "softwareVersion": "1.22.0",
+      "url": { "@id": "https://sumo.dlr.de/releases/1.22.0/" },
+      "description": "Microscopic vehicle-traffic simulator; its fcd-output XML is this workflow's Step 1 raw SUMO input."
+    },
+    {
+      "@id": "#netperfmeter",
+      "@type": "SoftwareApplication",
+      "name": "netperfmeter (extractvectors)",
+      "url": { "@id": "https://github.com/dreibh/netperfmeter" },
+      "description": "Provides the extractvectors command-line tool Step 1's extract_omnet_vectors() shells out to, to pull named vectors out of a raw OMNeT++ .vec file. Built from source and validated against real OMNeT++ output as part of this refactor; part of the INET 4.5.4 toolchain (see #inet)."
+    },
+
+    {
+      "@id": "#param-raw-sumo-xml-path",
+      "@type": "FormalParameter",
+      "name": "RAW_SUMO_XML_PATH",
+      "description": "Raw SUMO fcd-output XML file (the simulator's own --fcd-output), one <timestep> element per simulated tick containing one <vehicle> element per vehicle present.",
+      "defaultValue": "example-data/raw_sumo_fcd.xml"
+    },
+    {
+      "@id": "#param-raw-omnet-vec-path",
+      "@type": "FormalParameter",
+      "name": "RAW_OMNET_VEC_PATH",
+      "description": "Raw OMNeT++ .vec vector file (the simulator's own vector recording output): declaration lines mapping numeric vector ids to car/module/statistic names, followed by <id, event, time, value> data rows.",
+      "defaultValue": "example-data/raw_omnet_vector.vec"
+    },
+    {
+      "@id": "#param-sumo-base-path",
+      "@type": "FormalParameter",
+      "name": "SUMO_OUTPUT_PATH",
+      "description": "Base SUMO trajectory CSV parsed from the raw fcd-output XML: one row per vehicle per timestep, columns t, veh_id, x, y, angle, speed, pos, lane, slope, signals.",
+      "defaultValue": "sumo_trajectory_base.csv"
+    },
+    {
+      "@id": "#param-raw-omnet-path",
+      "@type": "FormalParameter",
+      "name": "RAW_OMNET_PATH",
+      "description": "Raw OMNeT++ vector export CSV (tab-separated Time/Object/Vector/Value). Step 3's own default points at the bundled example-data/raw_omnet_export.csv rather than chaining onto Step 1's OMNET_OUTPUT_PATH, so Step 3 onward is runnable without the external extractvectors tool Step 1 depends on.",
+      "defaultValue": "example-data/raw_omnet_export.csv"
+    },
+    {
+      "@id": "#param-omnet-matrix-path",
+      "@type": "FormalParameter",
+      "name": "OUTPUT_MATRIX_PATH / OMNET_PATH",
+      "description": "Wide-format OMNeT++ feature matrix, one row per vehicle per resampled tick.",
+      "defaultValue": "omnet_feature_matrix.csv"
+    },
+    {
+      "@id": "#param-vehicles-path",
+      "@type": "FormalParameter",
+      "name": "VEHICLES_PATH",
+      "description": "SUMO trajectory CSV (Step 1 output plus Step 2's lagged x-1..x-7/y-1..y-7 past-position columns), one row per vehicle per timestep.",
+      "defaultValue": "sumo_trajectory.csv"
+    },
+    {
+      "@id": "#param-mapping-path",
+      "@type": "FormalParameter",
+      "name": "MAPPING_PATH",
+      "description": "Vehicle id mapping between the SUMO and OMNeT++/VEINS simulations, produced by the simulation tooling itself (one 'SUMO=<id> VEINS=<id>' entry per line).",
+      "defaultValue": "example-data/sumo_veins_mapping.txt"
+    },
+    {
+      "@id": "#param-combined-path",
+      "@type": "FormalParameter",
+      "name": "COMBINED_PATH",
+      "description": "SUMO trajectory merged with the OMNeT++ feature matrix.",
+      "defaultValue": "combined_dataset.csv"
+    },
+    {
+      "@id": "#param-new-combined-path",
+      "@type": "FormalParameter",
+      "name": "OUTPUT_PATH (Step 5)",
+      "description": "Combined dataset with the 999999 placeholder sentinel replaced in the lagged position columns.",
+      "defaultValue": "combined_dataset_fixed.csv"
+    },
+    {
+      "@id": "#param-labeled-dataset-path",
+      "@type": "FormalParameter",
+      "name": "dataset_labeled_w<W>.csv",
+      "description": "Final AI-ready dataset: input dataset plus migration and destination label columns.",
+      "defaultValue": "dataset_labeled_w3.csv"
+    },
+    {
+      "@id": "#param-notebooks-dir",
+      "@type": "FormalParameter",
+      "name": "NOTEBOOKS_DIR",
+      "description": "Directory containing the step_1...step_7 notebooks that run_pipeline.ipynb calls via papermill.",
+      "defaultValue": "notebooks"
+    },
+    {
+      "@id": "#param-output-dir",
+      "@type": "FormalParameter",
+      "name": "OUTPUT_DIR",
+      "description": "Directory run_pipeline.ipynb writes every intermediate/final pipeline output into, plus an executed/ subfolder holding a fully executed copy of each step notebook for provenance.",
+      "defaultValue": "pipeline_run"
+    },
+    {
+      "@id": "#param-run-sumo-parse",
+      "@type": "FormalParameter",
+      "name": "RUN_SUMO_PARSE",
+      "description": "Whether run_pipeline.ipynb should actually invoke Step 1's parse_sumo_fcd(); defaults to True in the master notebook (a full pipeline run needs this), unlike Step 1's own standalone default of False.",
+      "defaultValue": "true"
+    },
+    {
+      "@id": "#param-run-omnet-extract",
+      "@type": "FormalParameter",
+      "name": "RUN_OMNET_EXTRACT",
+      "description": "Whether run_pipeline.ipynb should actually invoke Step 1's extract_omnet_vectors(); defaults to False since it requires the external extractvectors tool. When True, Step 3 automatically reads Step 1's output instead of the RAW_OMNET_PATH parameter.",
+      "defaultValue": "false"
+    },
+    {
+      "@id": "#param-run-visualization",
+      "@type": "FormalParameter",
+      "name": "RUN_VISUALIZATION",
+      "description": "Whether run_pipeline.ipynb should run the optional Step 7 diagnostics/plots notebook after Step 6.",
+      "defaultValue": "true"
+    },
+    {
+      "@id": "#param-window-s-values",
+      "@type": "FormalParameter",
+      "name": "WINDOW_S_VALUES",
+      "description": "Pre-handover warning window(s), in seconds, that Step 6 labels (and Step 7 visualizes).",
+      "defaultValue": "[3.0]"
+    },
+    {
+      "@id": "#param-tol-s",
+      "@type": "FormalParameter",
+      "name": "TOL_S",
+      "description": "Step 6's stable-run tolerance: a run counts as stable if its duration is at least WINDOW_S - TOL_S.",
+      "defaultValue": "0.1"
+    }
+  ]
+}

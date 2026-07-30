@@ -1,0 +1,41 @@
+cff-version: 1.2.0
+message: "If you use this workflow, please cite it as below."
+title: "FUMD-AI Preprocessing Workflow"
+version: 1.0.0
+date-released: "2026-07-30"
+license:
+  - MIT
+  - CC-BY-4.0
+type: software
+authors:
+  - family-names: Bernad
+    given-names: Cristina
+    orcid: "https://orcid.org/0000-0001-9537-415X"
+    affiliation: "Miguel Hernandez University"
+  - family-names: Filiposka
+    given-names: Sonja
+    email: sonja.filiposka@finki.ukim.mk
+    orcid: "https://orcid.org/0000-0003-0034-2855"
+    affiliation: "Ss. Cyril and Methodius University in Skopje"
+  - family-names: Gilly
+    given-names: Katja
+    orcid: "https://orcid.org/0000-0002-8985-0639"
+    affiliation: "Miguel Hernandez University"
+keywords:
+  - SUMO
+  - OMNeT++
+  - vehicular networks
+  - cellular handover
+  - mobility prediction
+  - machine learning dataset
+  - 5G
+  - V2X
+abstract: >-
+  Turns raw SUMO (vehicle mobility) and OMNeT++ (cellular network)
+  simulation output into a labeled, AI-ready dataset of cellular
+  handover/migration events, for training cellular handover / migration
+  prediction models. Seven Jupyter notebooks cover the pipeline from raw
+  simulator output to the labeled dataset, plus a master orchestrator
+  notebook (run_pipeline.ipynb) that runs the whole chain in one call.
+# repository-code: "<add repository URL here once the workflow is deposited, e.g. GitHub/WorkflowHub record>"
+# doi: "<add DOI here once registered/archived, e.g. via WorkflowHub/Zenodo>"
