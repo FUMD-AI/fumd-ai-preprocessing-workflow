@@ -37,5 +37,5 @@ abstract: >-
   prediction models. Seven Jupyter notebooks cover the pipeline from raw
   simulator output to the labeled dataset, plus a master orchestrator
   notebook (run_pipeline.ipynb) that runs the whole chain in one call.
-# repository-code: "<add repository URL here once the workflow is deposited, e.g. GitHub/WorkflowHub record>"
+repository-code: "https://github.com/FUMD-AI/fumd-ai-preprocessing-workflow"
 # doi: "<add DOI here once registered/archived, e.g. via WorkflowHub/Zenodo>"

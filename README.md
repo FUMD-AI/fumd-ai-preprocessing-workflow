@@ -290,27 +290,21 @@ Project with Grant Number 25-EOSC-GRV-INTER-013.
 ## Citation
 
 Please cite this workflow if you use it. See `CITATION.cff` and
-`ro-crate-metadata.json` for structured citation/author metadata - fill in
-a repository URL and DOI in both once the workflow has a Git repository
-and is registered/archived (e.g. on WorkflowHub or Zenodo).
+`ro-crate-metadata.json` for structured citation/author metadata - a DOI
+slot is reserved in both, to be filled in once the workflow is registered
+on WorkflowHub (see below).
 
 ## Publishing on WorkflowHub
 
 This repository is packaged as a [Workflow RO-Crate](https://w3id.org/workflowhub/workflow-ro-crate/1.0)
-so it can be registered on [WorkflowHub](https://workflowhub.eu/). Two
-things still need to happen outside this repository before that can
-happen:
+so it can be registered on [WorkflowHub](https://workflowhub.eu/), under
+the [FUMD-AI Team](https://github.com/FUMD-AI). Repository:
+https://github.com/FUMD-AI/fumd-ai-preprocessing-workflow
 
-1. **Push this repository to a public Git host** (GitHub/GitLab) - or
-   prepare a zip of the whole folder for direct RO-Crate upload.
-   WorkflowHub registers a workflow from one of those two sources. Once
-   you have a URL, fill it in as the `repository-code` field in
-   `CITATION.cff`, the `<add repository URL here...>` placeholder in every
-   notebook's header cell, and the corresponding note in this README.
-2. **Register it on workflowhub.eu**, pointing at that repository (or
-   uploading the zip). WorkflowHub can auto-archive the crate to Zenodo on
-   registration, which mints a DOI - add that DOI back into `CITATION.cff`
-   and `ro-crate-metadata.json` afterwards.
+**Register it on workflowhub.eu**, pointing at that repository. WorkflowHub
+can auto-archive the crate to Zenodo on registration, which mints a DOI -
+add that DOI back into `CITATION.cff` and `ro-crate-metadata.json`
+afterwards.
 
 Everything else WorkflowHub needs is already in place: RO-Crate 1.1 +
 Workflow RO-Crate profile 1.0 metadata, a `mainEntity` (`run_pipeline.ipynb`),
