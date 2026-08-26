@@ -200,6 +200,15 @@ nothing but their own default parameters against the bundled
 `example-data/`, confirming the whole chain is runnable immediately after
 downloading the workflow.
 
+The pipeline was additionally validated on a much larger real simulation
+run (893 vehicles, a 43M-row raw OMNeT++ export, 1800 simulated seconds),
+producing a final labeled dataset of ~9.15M rows with no missing values.
+That run surfaced and fixed several edge cases this workflow now handles
+correctly: `extractvectors` output format variations across builds, a
+dual-connectivity network's redundant LTE-stack vectors, vehicles with no
+downlink traffic at all, and SUMO/OMNeT id reuse in the vehicle mapping
+file.
+
 ## Development notes
 
 **v1.0.1** fixed three bugs:

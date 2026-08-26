@@ -15,7 +15,7 @@
       "@type": "Dataset",
       "name": "FUMD-AI Preprocessing Workflow",
       "description": "Turns raw SUMO (vehicle mobility) and OMNeT++ (cellular network) simulation output into a labeled, AI-ready dataset of cellular handover/migration events. Seven Jupyter notebooks, numbered 1-7 in run order, cover the pipeline: parse raw simulator output (1), add past-position lag columns (2), generate the OMNeT++ feature matrix (3), merge it with SUMO trajectories (4), fix placeholder past-position values (5), label migration/destination - the AI-ready dataset (6), and optional diagnostic visualizations (7). A master notebook, run_pipeline.ipynb, calls all seven in order via papermill from one set of top-level parameters, so the whole workflow can be run with a single notebook invocation instead of running each step by hand; the individual step notebooks also remain fully usable on their own. Every notebook's default parameters chain onto the tiny bundled example-data/ directory, so the whole workflow is runnable immediately after downloading, with no edits, against a small synthetic (non-real) dataset. See README.md for the full step-by-step description, inputs/outputs, and how to run each step (including headless/parameterized execution with papermill). Unless otherwise indicated, source code is MIT-licensed and explanatory text/figures are CC BY 4.0; input datasets retain the licences stated in their own metadata/source records.",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "license": [
         "https://spdx.org/licenses/MIT",
         "https://creativecommons.org/licenses/by/4.0/"
