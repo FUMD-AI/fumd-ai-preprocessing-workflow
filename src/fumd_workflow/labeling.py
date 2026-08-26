@@ -11,7 +11,7 @@ Author(s):
 
 Copyright:    (c) 2026 Cristina Bernad, Sonja Filiposka, Katja Gilly
 Repository:   https://github.com/FUMD-AI/fumd-ai-preprocessing-workflow
-Version:      1.1.0
+Version:      1.1.1
 Funding:      This work has been funded by the FUMD-AI project, an EOSC GRAVITY -
               Inter Project with Grant Number 25-EOSC-GRV-INTER-013.
 
@@ -312,7 +312,7 @@ def annotate_migrations(
             win_idx = idx_veh[in_win]
             out.loc[win_idx, "destination"] = pd.Series(to_cell, index=win_idx, dtype="Int64")
             out.loc[win_idx, "migration"] = pd.Series(2, index=win_idx, dtype="Int8")
-            out.at[win_idx[0], "migration"] = pd.Series(1, dtype="Int8")
+            out.at[win_idx[0], "migration"] = 1
 
     # -------- resolve destination outside of warning windows --------
     if destination_mode == "freeze_stable":

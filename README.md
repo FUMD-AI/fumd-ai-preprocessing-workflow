@@ -226,6 +226,32 @@ file.
 
 ## Development notes
 
+**v1.1.1** fixed a pandas-version-sensitive crash in Step 6's labeling
+logic (`src/fumd_workflow/labeling.py`), found when running the workflow
+on a third machine (Python 3.14, pandas 3.0.5 - newer than any
+environment this project had previously been tested against):
+
+- `annotate_migrations()` marks every row inside a pre-handover warning
+  window with `migration=2`, then overwrites just the first row of that
+  window with `migration=1` to flag the actual onset. That single-cell
+  overwrite used `out.at[win_idx[0], "migration"] = pd.Series(1,
+  dtype="Int8")` - passing a length-1 `pd.Series` where `.at[]` expects a
+  bare scalar. Pandas versions used elsewhere in this project's testing
+  (2.1.4 and 2.3.3) silently unwrap a length-1 Series into its scalar
+  value there, so this went unnoticed; pandas 3.0 made Copy-on-Write
+  mandatory and removed a number of legacy lenient-coercion fallbacks in
+  `.at[]`/masked-array `__setitem__`, so 3.0.5 rejects it instead, raising
+  a chained `TypeError` ("only 0-dimensional arrays can be converted to
+  Python scalars") followed by two `ValueError`s ending in "Incompatible
+  indexer with Series". Fixed by assigning the plain scalar `1` directly,
+  which is correct and has been verified to work identically across
+  pandas versions old and new - it never relied on the lenient behavior to
+  begin with.
+- Audited the rest of `labeling.py` and every notebook for the same class
+  of issue (`.at[]`/`.iat[]` misuse, chained indexing assignment,
+  deprecated/removed pandas APIs): this was the only occurrence anywhere
+  in the codebase.
+
 **v1.1.0** added an opt-in vector-extraction alternative and fixed a
 visualization bug, both re-validated end-to-end against the same real
 `VoipDl-Urban-900_1` dataset described in Validation above after making
