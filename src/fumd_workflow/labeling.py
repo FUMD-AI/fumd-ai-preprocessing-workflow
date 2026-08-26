@@ -2,7 +2,7 @@
 =============================================================================
 FUMD-AI Preprocessing Workflow -- shared library: migration labeling logic
 =============================================================================
-Used by: notebooks/step_4_label_cell_migrations.ipynb
+Used by: notebooks/step_6_label_cell_migrations.ipynb
 
 Author(s):
   - Cristina Bernad (ORCID: 0000-0001-9537-415X)
@@ -10,8 +10,8 @@ Author(s):
   - Katja Gilly (ORCID: 0000-0002-8985-0639)
 
 Copyright:    (c) 2026 Cristina Bernad, Sonja Filiposka, Katja Gilly
-Repository:   <add repository URL here once the workflow is deposited, e.g. GitHub/WorkflowHub record>
-Version:      1.0.0
+Repository:   https://github.com/FUMD-AI/fumd-ai-preprocessing-workflow
+Version:      1.1.0
 Funding:      This work has been funded by the FUMD-AI project, an EOSC GRAVITY -
               Inter Project with Grant Number 25-EOSC-GRV-INTER-013.
 

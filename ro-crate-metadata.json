@@ -15,7 +15,7 @@
       "@type": "Dataset",
       "name": "FUMD-AI Preprocessing Workflow",
       "description": "Turns raw SUMO (vehicle mobility) and OMNeT++ (cellular network) simulation output into a labeled, AI-ready dataset of cellular handover/migration events. Seven Jupyter notebooks, numbered 1-7 in run order, cover the pipeline: parse raw simulator output (1), add past-position lag columns (2), generate the OMNeT++ feature matrix (3), merge it with SUMO trajectories (4), fix placeholder past-position values (5), label migration/destination - the AI-ready dataset (6), and optional diagnostic visualizations (7). A master notebook, run_pipeline.ipynb, calls all seven in order via papermill from one set of top-level parameters, so the whole workflow can be run with a single notebook invocation instead of running each step by hand; the individual step notebooks also remain fully usable on their own. Every notebook's default parameters chain onto the tiny bundled example-data/ directory, so the whole workflow is runnable immediately after downloading, with no edits, against a small synthetic (non-real) dataset. See README.md for the full step-by-step description, inputs/outputs, and how to run each step (including headless/parameterized execution with papermill). Unless otherwise indicated, source code is MIT-licensed and explanatory text/figures are CC BY 4.0; input datasets retain the licences stated in their own metadata/source records.",
-      "version": "1.0.2",
+      "version": "1.1.0",
       "license": [
         "https://spdx.org/licenses/MIT",
         "https://creativecommons.org/licenses/by/4.0/"
@@ -131,6 +131,7 @@
         { "@id": "#param-output-dir" },
         { "@id": "#param-run-sumo-parse" },
         { "@id": "#param-run-omnet-extract" },
+        { "@id": "#param-omnet-extractor-method" },
         { "@id": "#param-run-visualization" },
         { "@id": "#param-window-s-values" },
         { "@id": "#param-tol-s" }
@@ -152,14 +153,15 @@
       "@id": "notebooks/step_1_parse_raw_sumo_and_omnet.ipynb",
       "@type": ["File", "SoftwareSourceCode", "ComputationalWorkflow"],
       "name": "Step 1: Parse raw SUMO and OMNeT++ simulation output",
-      "description": "Turns the two genuinely raw simulator outputs - a SUMO fcd-output XML file and an OMNeT++ .vec vector file - into the flat CSVs the rest of the workflow reads: parse_sumo_fcd() streams the XML into a per-vehicle-per-timestep trajectory CSV, and extract_omnet_vectors() pulls the named network-quality vectors out of the .vec file into a long-format CSV.",
+      "description": "Turns the two genuinely raw simulator outputs - a SUMO fcd-output XML file and an OMNeT++ .vec vector file - into the flat CSVs the rest of the workflow reads: parse_sumo_fcd() streams the XML into a per-vehicle-per-timestep trajectory CSV, and either extract_omnet_vectors() (external extractvectors tool) or extract_omnet_vectors_pure_python() (dependency-free, selected via OMNET_EXTRACTOR_METHOD) pulls the named network-quality vectors out of the .vec file into a long-format CSV.",
       "position": 1,
       "conformsTo": { "@id": "https://bioschemas.org/profiles/ComputationalWorkflow/1.0-RELEASE" },
       "programmingLanguage": { "@id": "#jupyter-notebook" },
       "encodingFormat": "application/x-ipynb+json",
       "input": [
         { "@id": "#param-raw-sumo-xml-path" },
-        { "@id": "#param-raw-omnet-vec-path" }
+        { "@id": "#param-raw-omnet-vec-path" },
+        { "@id": "#param-omnet-extractor-method" }
       ],
       "output": [
         { "@id": "#param-sumo-base-path" },
@@ -396,7 +398,7 @@
       "@type": "SoftwareApplication",
       "name": "netperfmeter (extractvectors)",
       "url": { "@id": "https://github.com/dreibh/netperfmeter" },
-      "description": "Provides the extractvectors command-line tool Step 1's extract_omnet_vectors() shells out to, to pull named vectors out of a raw OMNeT++ .vec file. Built from source and validated against real OMNeT++ output; part of the INET 4.5.4 toolchain (see #inet)."
+      "description": "Provides the extractvectors command-line tool Step 1's extract_omnet_vectors() shells out to, to pull named vectors out of a raw OMNeT++ .vec file. Built from source and validated against real OMNeT++ output; part of the INET 4.5.4 toolchain (see #inet). Optional: Step 1's OMNET_EXTRACTOR_METHOD='python' option reads the .vec file directly instead, with no external tool."
     },
 
     {
@@ -494,8 +496,15 @@
       "@id": "#param-run-omnet-extract",
       "@type": "FormalParameter",
       "name": "RUN_OMNET_EXTRACT",
-      "description": "Whether run_pipeline.ipynb should actually invoke Step 1's extract_omnet_vectors(); defaults to False since it requires the external extractvectors tool. When True, Step 3 automatically reads Step 1's output instead of the RAW_OMNET_PATH parameter.",
+      "description": "Whether run_pipeline.ipynb should actually invoke Step 1's vector extraction (extract_omnet_vectors() or extract_omnet_vectors_pure_python(), per OMNET_EXTRACTOR_METHOD); defaults to False since the default extractor requires the external extractvectors tool. When True, Step 3 automatically reads Step 1's output instead of the RAW_OMNET_PATH parameter.",
       "defaultValue": "false"
+    },
+    {
+      "@id": "#param-omnet-extractor-method",
+      "@type": "FormalParameter",
+      "name": "OMNET_EXTRACTOR_METHOD",
+      "description": "Which of Step 1's two vector-extraction implementations RUN_OMNET_EXTRACT invokes: 'extractvectors' (default, shells out to the external netperfmeter tool) or 'python' (dependency-free, reads the .vec file directly; cross-checked against real extractvectors output - identical Time/Object/Value content, fewer rows since it excludes non-car modules and the redundant LTE-stack servingCell duplicate at the source, and full source-file float precision preserved - but slower on very large files since it is pure Python and single-threaded).",
+      "defaultValue": "extractvectors"
     },
     {
       "@id": "#param-run-visualization",
