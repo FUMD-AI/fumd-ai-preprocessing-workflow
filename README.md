@@ -151,7 +151,11 @@ workflow was validated against (see Validation below):
 `extractvectors` (from the [netperfmeter](https://github.com/dreibh/netperfmeter)
 project, used by Step 1's `extract_omnet_vectors()`) was built from source
 and validated against real OMNeT++ output; it is
-part of the INET 4.5.4 toolchain above.
+part of the INET 4.5.4 toolchain above. Its exact output format (extra
+event/object-id columns, header style) has been observed to vary across
+builds - Step 3's cleaning step (see Development notes) normalizes the
+variations seen so far automatically, so this shouldn't require any
+manual handling on your part.
 
 **Python/notebook environment**, from a real end-to-end `papermill` run of
 `run_pipeline.ipynb` on macOS with its default BSD `sed`:
