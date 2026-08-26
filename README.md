@@ -154,6 +154,10 @@ workflow was validated against (see Validation below):
 | Veins | 5.3.1 | https://veins.car2x.org/download/ |
 | SUMO | 1.22.0 | https://sumo.dlr.de/releases/1.22.0/ |
 
+fcd-output from SUMO 1.27.1 has also been used successfully (see
+Validation below) - the fcd XML format read by Step 1 has been stable
+across this range.
+
 `extractvectors` (from the [netperfmeter](https://github.com/dreibh/netperfmeter)
 project, used by Step 1's default extractor, `extract_omnet_vectors()`)
 was built from source and validated against real OMNeT++ output; it is
@@ -223,6 +227,21 @@ correctly: `extractvectors` output format variations across builds, a
 dual-connectivity network's redundant LTE-stack vectors, vehicles with no
 downlink traffic at all, and SUMO/OMNeT id reuse in the vehicle mapping
 file.
+
+A second independent real simulation run (900 vehicles, 1800 simulated
+seconds, generated with SUMO 1.27.1) was used to validate v1.1.0's new
+extractor: Step 1's `OMNET_EXTRACTOR_METHOD = "python"` option processed a
+28 GB / 835M-line raw `.vec` file end-to-end (its largest input to date)
+via `run_pipeline.ipynb`, and the full pipeline completed with zero errors
+and zero missing values in the final labeled dataset (89,757 rows across
+all 900 vehicles - this run's SUMO fcd-output happened to be recorded at
+1 Hz rather than the finer rate used in the run above, hence the smaller
+row count relative to OMNeT's own resolution; all 9 base stations are
+still represented and 2,048 handover events were detected).
+
+The v1.1.1 crash fixed below (see Development notes) was found separately,
+running the workflow against a third real dataset on a different machine
+(Python 3.14, pandas 3.0.5).
 
 ## Development notes
 
