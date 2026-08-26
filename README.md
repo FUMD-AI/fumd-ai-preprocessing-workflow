@@ -211,6 +211,50 @@ file.
 
 ## Development notes
 
+**v1.0.2** fixed bugs surfaced by the larger real run described in
+Validation above:
+
+- Step 3's LTE/NR dual-connectivity `servingCell` deduplication only
+  matched `car[N].cellularNic.phy` immediately after a tab, which never
+  fires when the module path carries a network-instance prefix (e.g.
+  `NRSeveralBSALC.car[3]...`). Both the constant-0 LTE copy and the real
+  NR copy were surviving into the pivot and getting collapsed via
+  `aggregate("min")`, corrupting `servingCell` toward 0. Fixed to tolerate
+  an arbitrary prefix before `car[`.
+- Step 3's cleaning now normalizes `extractvectors` output format
+  variations across builds: an extra event number and internal numeric
+  object id before Time/Object, a space-separated (rather than
+  tab-separated) header, and the vector name bundled with its format
+  string and an empty Split field in one column.
+- Step 3's raw-file header skip (via a Python file iterator, then handing
+  that same file object to `sed` as a subprocess) corrupted the first data
+  row - Python's internal read-ahead buffering silently desyncs the
+  underlying file descriptor position. Fixed by piping through
+  `tail -n +2 | sed` instead.
+- Step 3 now reduces `Object` to a bare integer id (stripping the OMNeT++
+  network's own top-level module name), which it never did before - this
+  happened to work by coincidence when no such prefix existed, but fails
+  Step 4's merge otherwise (a dtype mismatch between `int64` and `object`).
+- Step 3 now fills certain RLC downlink metrics with 0 for vehicles with no
+  downlink application traffic at all, rather than treating their absence
+  as an unconditional error - they're genuinely never recorded for such
+  vehicles, not missing data.
+- Step 3's `rlcPduThroughputDl` moved to the always-zero metrics list:
+  every recorded value for it is exactly 0 across a full real run, even
+  for vehicles with real nonzero values on the near-identical
+  `rlcThroughputDl`.
+- Step 3's always-zero metrics were only being dropped in the resampling
+  step, after the NaN check in the pivot step had already run - so a
+  column about to be dropped anyway could still fail that check. Now
+  dropped immediately after pivoting.
+- Step 4's duplicate-SUMO-id remap built two independently-deduplicated
+  arrays of ids and paired them up positionally, which only works when
+  every reused SUMO id is reused exactly once. On a larger run this
+  produced arrays of different lengths and could silently mis-pair ids
+  even when lengths matched by coincidence. Fixed to build an explicit
+  id-to-id mapping instead, correct regardless of how many times an id
+  repeats.
+
 **v1.0.1** fixed three bugs:
 
 - Step 3's raw-export cleaning `sed` pattern used a `\t` escape that only
