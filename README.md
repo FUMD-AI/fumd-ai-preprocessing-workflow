@@ -245,6 +245,24 @@ running the workflow against a third real dataset on a different machine
 
 ## Development notes
 
+**v1.1.2** generalized Step 3's "vehicle with a metric never recorded"
+handling, after the v1.1.1 retest surfaced the same class of `AssertionError:
+unexpected NaNs remain after fill` on a different dataset - this time for a
+metric outside the fixed `NO_TRAFFIC_FILL_ZERO_VECTORS` list added in v1.0.2
+(that list only covered the three RLC downlink metrics that happened to be
+missing on the dataset used to write it). Rather than extend the list again
+for whichever specific metric this next dataset was missing, the fix removes
+the fixed list entirely: any metric still `NaN` after per-vehicle
+ffill/bfill - meaning it was never recorded even once for that vehicle,
+since ffill/bfill can only propagate a value that exists somewhere in that
+vehicle's own timeline - is now filled with `0` regardless of which column
+it is, consistent with `servingCell`'s own established "not yet connected"
+convention elsewhere in this data. A summary of how many values got filled,
+and in which columns, is printed so an occasional quiet vehicle (expected)
+stays distinguishable from a sudden large jump (a sign something upstream,
+like the id mapping, is actually broken). Pending confirmation on the
+machine/dataset that originally hit this.
+
 **v1.1.1** fixed a pandas-version-sensitive crash in Step 6's labeling
 logic (`src/fumd_workflow/labeling.py`), found when running the workflow
 on a third machine (Python 3.14, pandas 3.0.5 - newer than any
