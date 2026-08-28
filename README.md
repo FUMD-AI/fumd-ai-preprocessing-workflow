@@ -252,6 +252,26 @@ running the workflow against a third real dataset on a different machine
 
 ## Development notes
 
+**v1.1.4** corrected two swapped case codes in Step 6's handover
+classification (`src/fumd_workflow/labeling.py`), used by Step 7's
+event-type-distribution plot:
+
+- The case for a vehicle's first-ever stable run, reached with no earlier
+  stable "from" cell to compare against (no prior history), was labeled
+  `C2b`. It is now `C3`.
+- The ping-pong case (stable -> short runs only -> back to the *same*
+  stable cell, not a real handover) was labeled `C3`. It is now `C2b`.
+- Updated everywhere the codes appear: `labeling.py`'s docstring table and
+  both `_log_case()` call sites, Step 7's `EVENT_ORDER`/`EVENT_LABELS`, and
+  Step 6's own descriptive comment (which previously grouped C2a/C2b
+  together as "delayed handovers" - no longer accurate now that C2b is
+  ping-pong, not a delayed handover at all).
+- Verified with a synthetic reproduction of both cases run through the
+  actual `annotate_migrations()` function: a no-prior-history vehicle now
+  tags as `C3_handover_sin_historico` and a ping-pong vehicle now tags as
+  `C2b_pingpong`, and Step 7's relabeled `EVENT_ORDER` correctly lines up
+  against that output.
+
 **v1.1.3** fixed a silent data-loss bug in Step 4's SUMO<->OMNeT id
 alignment, found while investigating what looked like mapping-file
 corruption on a fourth real dataset (`VoipDl-Urban-1200_3`) - a SUMO id

@@ -11,7 +11,7 @@ Author(s):
 
 Copyright:    (c) 2026 Cristina Bernad, Sonja Filiposka, Katja Gilly
 Repository:   https://github.com/FUMD-AI/fumd-ai-preprocessing-workflow
-Version:      1.1.1
+Version:      1.1.4
 Funding:      This work has been funded by the FUMD-AI project, an EOSC GRAVITY -
               Inter Project with Grant Number 25-EOSC-GRV-INTER-013.
 
@@ -150,11 +150,11 @@ def annotate_migrations(
     -----------------------------------------
     C1_handover_normal          stable -> stable, direct transition
     C2a_ABC                     stable -> (short runs only) -> different stable
-    C2b_handover_sin_historico  first stable run reached after only short
+    C2b_pingpong                stable -> (short runs only) -> same stable
+                                 (not a real handover)
+    C3_handover_sin_historico   first stable run reached after only short
                                 runs since the start of the recording
                                 (no earlier stable "from" cell to compare to)
-    C3_pingpong                 stable -> (short runs only) -> same stable
-                                 (not a real handover)
     C4_no_estable                entering a short/unstable run right after a
                                 stable one (kept for diagnostics only)
     """
@@ -239,7 +239,7 @@ def annotate_migrations(
                                     events.append({veh_col: veh, "t_change": t_change, "from_cell": prev_cell,
                                                     "to_cell": cell_i, "policy": "strict_burst"})
                                 else:
-                                    _log_case(veh, t_change, prev_cell, cell_i, "C3_pingpong",
+                                    _log_case(veh, t_change, prev_cell, cell_i, "C2b_pingpong",
                                                policy="strict_burst", note="stable->shorts->same_stable")
                         prev_stable_idx = i
 
@@ -259,12 +259,12 @@ def annotate_migrations(
                     from_cell = int(grp.loc[0, "servingCell"])
                     t_change = float(grp.loc[stable_idx, "start_time"])
                     if to_cell != from_cell:
-                        _log_case(veh, t_change, from_cell, to_cell, "C2b_handover_sin_historico",
+                        _log_case(veh, t_change, from_cell, to_cell, "C3_handover_sin_historico",
                                    policy="strict_startburst")
                         events.append({veh_col: veh, "t_change": t_change, "from_cell": from_cell,
                                         "to_cell": to_cell, "policy": "strict_startburst"})
                     else:
-                        _log_case(veh, t_change, from_cell, to_cell, "C3_pingpong",
+                        _log_case(veh, t_change, from_cell, to_cell, "C2b_pingpong",
                                    policy="strict_startburst", note="start_shorts->same_stable")
 
     elif announce_policy == "lookback":
