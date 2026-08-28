@@ -250,7 +250,35 @@ The v1.1.1 crash fixed below (see Development notes) was found separately,
 running the workflow against a third real dataset on a different machine
 (Python 3.14, pandas 3.0.5).
 
+A fourth real simulation run (`VoipDl-Urban-1200_3`, 1200 vehicles, 1800
+simulated seconds, a ~35.5 GB raw `.vec` file - the largest input to date)
+was used to confirm the v1.1.3 and v1.1.4 fixes below: the pipeline
+completed end-to-end with zero errors via `run_pipeline.ipynb`, correctly
+resolved all 22 teleportation-affected mapping rows (SUMO ids reused
+across multiple OMNeT ids) with every remapped id matching its OMNeT
+counterpart, and produced a labeled dataset (124,392 combined rows, 5,448
+vehicle runs, 2,777 actionable migration events) with the corrected event
+case labels (`C2b_pingpong`: 169, `C3_handover_sin_historico`: 48) and no
+leftover old-name cases. This dataset's SUMO fcd-output is logged at 1 Hz
+against OMNeT's much finer resolution, so Step 4's exact-time merge
+naturally keeps only ~1% of OMNeT samples (those landing on a whole
+second) - the same expected behavior already noted for the second
+validation run above, not a defect.
+
 ## Development notes
+
+**v1.1.5** removed the last two `papermill` "Unable to parse line" /
+"Passed unknown parameter" warnings, a cosmetic issue from the same
+fragile parameter-cell line-parser behind the `WINDOW_S_VALUES` CLI bug
+documented under Validation/earlier notes. Two trailing comments were
+triggering it: Step 2's `ROWS_PER_SECOND` line had an embedded `=` inside
+its parenthetical example, and Step 6's `TOL_S` line had embedded quotes
+and a `>=` comparison. Reworded both comments to avoid embedded `=` and
+quote characters (matching `run_pipeline.ipynb`'s own `TOL_S` line, which
+never triggered the warning). No logic changed - confirmed via a real
+rerun of `VoipDl-Urban-1200_3` producing byte-for-byte identical output to
+the pre-fix run, with the warnings no longer appearing anywhere in the
+papermill log.
 
 **v1.1.4** corrected two swapped case codes in Step 6's handover
 classification (`src/fumd_workflow/labeling.py`), used by Step 7's
@@ -311,8 +339,8 @@ slot with no teleport involved - was already known from `VoipDl-Urban-900_1`
 - Verified with synthetic reproductions of both cases (a teleporting SUMO
   id and a reused OMNeT id) run through the actual generated Step 4
   notebook: both split/resolve correctly and no feature-matrix rows are
-  lost. Pending confirmation against `VoipDl-Urban-1200_3`'s own full
-  pipeline run.
+  lost. Confirmed against `VoipDl-Urban-1200_3`'s own full pipeline run -
+  see Validation above.
 
 **v1.1.2** generalized Step 3's "vehicle with a metric never recorded"
 handling, after the v1.1.1 retest surfaced the same class of `AssertionError:
