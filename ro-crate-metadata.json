@@ -25,7 +25,9 @@
         { "@id": "#sonja-filiposka" },
         { "@id": "#katja-gilly" }
       ],
-      "funding": [ { "@id": "#fumdai-grant" } ],
+      "funding": [ { "@id": "#fumdai-grant" }, { "@id": "#plgrid-grant" } ],
+      "sponsor": { "@id": "#osc-lab" },
+      "mentions": { "@id": "#acknowledgements" },
       "softwareRequirements": [
         { "@id": "#omnetpp" },
         { "@id": "#simu5g" },
@@ -526,6 +528,40 @@
       "name": "TOL_S",
       "description": "Step 6's stable-run tolerance: a run counts as stable if its duration is at least WINDOW_S - TOL_S.",
       "defaultValue": "0.1"
+    },
+    {
+      "@id": "#plgrid",
+      "@type": "Organization",
+      "name": "PLGrid, Polish high-performance computing infrastructure",
+      "description": "HPC Centers: ACK Cyfronet AGH",
+      "url": "https://plgrid.pl/"
+    },
+    {
+      "@id": "#plgrid-grant",
+      "@type": "Grant",
+      "name": "PLGrid computational grant",
+      "identifier": "PLGINT/2026/019844",
+      "funder": { "@id": "#plgrid" },
+      "description": "Computer facilities and support provided by PLGrid (HPC Centers: ACK Cyfronet AGH)."
+    },
+    {
+      "@id": "#osc-lab",
+      "@type": "Organization",
+      "name": "Open Science Cloud research laboratory (OSC-LAB)",
+      "parentOrganization": { "@id": "#finki" }
+    },
+    {
+      "@id": "#finki",
+      "@type": "Organization",
+      "name": "Faculty of Computer Science and Engineering (FINKI), Ss. Cyril and Methodius University in Skopje",
+      "parentOrganization": { "@id": "#ukim" },
+      "location": "Skopje, North Macedonia"
+    },
+    {
+      "@id": "#acknowledgements",
+      "@type": "CreativeWork",
+      "name": "Acknowledgements",
+      "text": "This work has been funded by the FUMD-AI project, an EOSC GRAVITY - Inter Project with Grant Number 25-EOSC-GRV-INTER-013. We gratefully acknowledge Polish high-performance computing infrastructure PLGrid (HPC Centers: ACK Cyfronet AGH) for providing computer facilities and support within computational grant no. PLGINT/2026/019844. The research work was supported by the Open Science Cloud research laboratory (OSC-LAB) at the Faculty of Computer Science and Engineering (FINKI), Ss. Cyril and Methodius University in Skopje, North Macedonia."
     }
   ]
 }

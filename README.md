@@ -513,6 +513,14 @@ See `LICENSE.txt` (MIT, code) and `LICENSE-CC-BY-4.0.txt` (CC BY 4.0, text/figur
 This work has been funded by the FUMD-AI project, an EOSC GRAVITY - Inter
 Project with Grant Number 25-EOSC-GRV-INTER-013.
 
+We gratefully acknowledge Polish high-performance computing infrastructure
+PLGrid (HPC Centers: ACK Cyfronet AGH) for providing computer facilities and
+support within computational grant no. PLGINT/2026/019844.
+
+The research work was supported by the Open Science Cloud research laboratory
+(OSC-LAB) at the Faculty of Computer Science and Engineering (FINKI), Ss.
+Cyril and Methodius University in Skopje, North Macedonia.
+
 ## Citation
 
 Please cite this workflow if you use it. See `CITATION.cff` and
