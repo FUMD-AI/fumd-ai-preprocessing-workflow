@@ -38,4 +38,4 @@ abstract: >-
   simulator output to the labeled dataset, plus a master orchestrator
   notebook (run_pipeline.ipynb) that runs the whole chain in one call.
 repository-code: "https://github.com/FUMD-AI/fumd-ai-preprocessing-workflow"
-# doi: "<add DOI here once registered/archived, e.g. via WorkflowHub/Zenodo>"
+# doi: "https://doi.org/10.48546/workflowhub.workflow.2311.1"
